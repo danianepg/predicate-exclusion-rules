@@ -116,7 +116,7 @@ Now that all the validation “bed” is done, it is possible to use methods `fi
 
 It is important to be aware that the heavy use of Reflections can cause performance issues, but on this particular situation I’ve considered that some performance could be sacrificed to achieve the flexibility of the validation.
 
-The magic happens on line 13, when the method `test`is called. No additional test is required.  
+The magic happens when the method `test`is called. No additional test is required.  
 ```java
 /**
    * Retrieve the person's object fields by reflection and test its validity.
