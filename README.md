@@ -38,10 +38,77 @@ The rules above can be interpreted as:
 
 ### Using Predicates
 For each possible combination of operators and compators a validation class was created (`RuleContainsAnd`, `RuleContainsOr` and `RuleEqualsOr`). By implementing the interface `Predicate<T>` those classes can be used to validate an object through the simple and elegant call of `test(myFieldValue)` . It is only necessary to overwrite `test` method and define a custom rule.
-<script src="https://gist.github.com/danianepg/a21953db57099444f268413ac992e609.js"></script>
+
+```java
+public class RuleEqualsOr implements Predicate<String> {
+
+  private List<String> exclusionRulesLst;
+
+  public RuleEqualsOr(final List<String> exclusionRulesLst) {
+    this.exclusionRulesLst = exclusionRulesLst;
+  }
+
+  @Override
+  public boolean test(final String fieldValue) {
+    return this.exclusionRulesLst.stream().anyMatch(fieldValue::equals);
+  }
+
+}
+```
 
 Class `ExclusionRuleService` is the responsible to retrieve saved rules, transform them to its corresponding `Predicate` and keep them in a list. 
-<script src="https://gist.github.com/danianepg/c4f2d8e44ba68ed2e4954efc64f6742c.js"></script>
+
+```java
+/**
+   * Retrieve all rules from the database and process it.
+   *
+   * @return
+   */
+  private Map<String, Predicate<String>> decodeAllRules() {
+    // @formatter:off
+    return this.validationRuleRepository.findAll()
+        .stream()
+        .map(this::deconeOneRule)
+        .collect(Collectors.toMap(PairDTO::getRule, PairDTO::getPredicate));
+    // @formatter:on
+
+  }
+
+  /**
+   * According to the rule configuration, create a Predicate.
+   *
+   * @param validationRule
+   * @return
+   */
+  private PairDTO deconeOneRule(final ExclusionRule validationRule) {
+
+    PairDTO pairDTO = null;
+    List<String> values = new ArrayList<>();
+
+    if (validationRule.getRuleValues().contains(",")) {
+      values = Arrays.asList(validationRule.getRuleValues().split(","));
+    } else {
+      values.add(validationRule.getRuleValues());
+    }
+
+    if (validationRule.getComparator() == ComparatorEnum.EQUALS && validationRule.getOperator() == OperatorEnum.OR) {
+      pairDTO = new PairDTO(validationRule.getFieldName(), new RuleEqualsOr(values));
+
+    } else {
+
+      if (validationRule.getOperator() == OperatorEnum.OR) {
+        pairDTO = new PairDTO(validationRule.getFieldName(), new RuleContainsOr(values));
+      } else {
+        pairDTO = new PairDTO(validationRule.getFieldName(), new RuleContainsAnd(values));
+      }
+
+    }
+
+    return pairDTO;
+
+  }
+```
+
 
 ### Where the magic lives
 
@@ -50,11 +117,80 @@ Now that all the validation “bed” is done, it is possible to use methods `fi
 It is important to be aware that the heavy use of Reflections can cause performance issues, but on this particular situation I’ve considered that some performance could be sacrificed to achieve the flexibility of the validation.
 
 The magic happens on line 13, when the method `test`is called. No additional test is required.  
-<script src="https://gist.github.com/danianepg/f8bfa5fd81406214ddb21a6726fd062f.js"></script>
+```java
+/**
+   * Retrieve the person's object fields by reflection and test its validity.
+   *
+   * @param person
+   * @param entry
+   * @return
+   */
+  private Boolean isInvalidTestPredicate(final PersonDTO person, final Entry<String, Predicate<String>> entry) {
+
+    final Field field = this.reflectionService.getFieldByName(person, entry.getKey());
+    final String fieldValue = String.valueOf(this.reflectionService.getFieldValue(person, field));
+    
+    return entry.getValue().test(fieldValue);
+
+  }
+
+  /**
+   * Verify if a person is invalid if it fails on any determined rule.
+   *
+   * @param person
+   * @return
+   */
+  public Boolean isInvalid(final PersonDTO person) {
+    return exclusionRulesLst.entrySet().stream().anyMatch(e -> this.isInvalidTestPredicate(person, e));
+  }
+
+  /**
+   * Get only valid objects from a list
+   *
+   * @param personDTOLst
+   * @return
+   */
+  public List<PersonDTO> filterAllValid(final List<PersonDTO> personDTOLst) {
+    // @formatter:off
+    return personDTOLst.stream()
+              .filter(person -> !this.isInvalid(person))
+              .collect(Collectors.toList());
+    // @formatter:on
+  }
+```
+
 
 ## Test me
 On class `ExclusionRulesServiceTests` we can check if the rules are being properly applied to the fields of a PersonDTO object.
-<script src="https://gist.github.com/danianepg/6f20d10074187085a3880c31eae8299e.js"></script>
+
+```java
+@Test
+  public void filterAllValidPersonLstNameContainsOr_ok() {
+
+    final PersonDTO person = new PersonDTO();
+    person.setName("Daniane P. Gomes");
+    person.setEmail("danianepg@gmail.com");
+    person.setInternalCode("DPG001");
+    person.setCompany("ACME");
+    person.setLocation("BR");
+
+    final PersonDTO person2 = new PersonDTO();
+    person2.setName("Dobberius Louis The Free Elf");
+    person2.setEmail("dobby@free.com");
+    person2.setInternalCode("DLTFE");
+    person2.setCompany("Self Employed");
+    person2.setLocation("HG");
+
+    final List<PersonDTO> personLst = new ArrayList<>();
+    personLst.add(person);
+    personLst.add(person2);
+
+    final List<PersonDTO> personValidLst = this.exclusionRuleService.filterAllValid(personLst);
+
+    assertEquals(personValidLst.size(), 2);
+
+  }
+```
 
 ## Conclusion
 While consuming an external API we can receive data that is not properly structured. To check its relevance in a clean way we can:
