@@ -1,4 +1,4 @@
-# Clean Validation with Predicates
+# Clean Validation in Java with Predicates
 
 Imagine that you have to consume an API to retrieve data from people of your company. Now imagine that all these data don’t follow any pattern and the API can return not only people, but robots, “phantom” accounts and all the source of irrelevant information. There are no rules: no flag to identify if the data belongs to a person or to some other creature and from time to time you can discover another variation that would classify the data as invalid.
 
