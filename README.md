@@ -4,7 +4,7 @@ Imagine that you have to consume an API to retrieve data from people of your com
 
 Well, that happened. The validation could be achieved with “regex”, but it would be hard coded and the costumer would always depend on the change in the code and new deploys.
 
-## Aha!
+### Aha!
 
 The most efficient and clean way found to do that it in Java was to create a table to save the rules that would configure a record as invalid, read and convert them to Predicates and dynamically validate each part of the API’s return to classify an object as valid or invalid. 
 
@@ -194,6 +194,6 @@ On class `ExclusionRulesServiceTests` we can check if the rules are being proper
 
 ## Conclusion
 While consuming an external API we can receive data that is not properly structured. To check its relevance in a clean way we can:
-create a repository of rules and represent them  as `Predicate<T>` 
-convert the API response data to a `PersonDTO` object
-check if each attribute of `PersonDTO` is valid only by calling the method `test`
+* Create a repository of rules and represent them  as `Predicate<T>` 
+* Convert the API response data to a `PersonDTO` object
+* Check if each attribute of `PersonDTO` is valid only by calling the method `test`
