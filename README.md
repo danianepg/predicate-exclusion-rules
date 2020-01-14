@@ -198,4 +198,4 @@ While consuming an external API we can receive data that is not properly structu
 * Convert the API response data to a `PersonDTO` object
 * Check if each attribute of `PersonDTO` is valid only by calling the method `test`
 
-Originally posted on [my Medium page](https://medium.com/@danianepg/clean-validation-in-java-with-predicates-18bff4ba2888)
+Originally posted on [my Medium page](https://medium.com/@danianepg/clean-validation-in-java-with-predicates-18bff4ba2888).
