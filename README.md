@@ -10,7 +10,7 @@ The most efficient and clean way found to do that it in Java was to create a tab
 
 ## Show me the code
 
-This behaviour was reproduced on the project available on my GitHub, using Java 11 and Spring Boot.
+This behaviour was reproduced on the project available on my GitHub, using **Java 11** and Spring Boot.
 
 ### Object representation
 The external API’s data is represented by the class `PersonDTO`.
@@ -197,3 +197,5 @@ While consuming an external API we can receive data that is not properly structu
 * Create a repository of rules and represent them  as `Predicate<T>` 
 * Convert the API response data to a `PersonDTO` object
 * Check if each attribute of `PersonDTO` is valid only by calling the method `test`
+
+Originally posted on [my Medium page](https://medium.com/@danianepg/clean-validation-in-java-with-predicates-18bff4ba2888)
