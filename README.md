@@ -2,7 +2,7 @@
 
 Imagine that you have to consume an API to retrieve data from people of your company. Now imagine that all these data don’t follow any pattern and the API can return not only people, but robots, “phantom” accounts and all the source of irrelevant information. There are no rules: no flag to identify if the data belongs to a person or to some other creature and from time to time you can discover another variation that would classify the data as invalid.
 
-Well, that happened. The validation could be achieved with “regex”, but it would be hard coded and the costumer would always depend on the change in the code and new deploys.
+Well, that happened. The validation could be achieved with “regex”, but it would be hard coded and the customer would always depend on the change in the code and new deploys.
 
 ### Aha!
 
@@ -37,7 +37,7 @@ The rules above can be interpreted as:
 * If the attribute `location` on `PersonDTO` object is equals to “jupiter” or “mars”, the object is invalid.
 
 ### Using Predicates
-For each possible combination of operators and compators a validation class was created (`RuleContainsAnd`, `RuleContainsOr` and `RuleEqualsOr`). By implementing the interface `Predicate<T>` those classes can be used to validate an object through the simple and elegant call of `test(myFieldValue)` . It is only necessary to overwrite `test` method and define a custom rule.
+For each possible combination of operators and comparators a validation class was created (`RuleContainsAnd`, `RuleContainsOr` and `RuleEqualsOr`). By implementing the interface `Predicate<T>` those classes can be used to validate an object through the simple and elegant call of `test(myFieldValue)` . It is only necessary to overwrite `test` method and define a custom rule.
 
 ```java
 public class RuleEqualsOr implements Predicate<String> {
